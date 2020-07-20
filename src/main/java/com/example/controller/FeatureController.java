@@ -27,30 +27,42 @@ public class FeatureController {
 
     @GetMapping("/feature")
     public ResponseEntity<?> get(@RequestParam(value = "featureName", required = false) String featureName, @RequestParam(value = "email", required = false) String email) {
-        log.info("featureName " + featureName);
-        log.info("email " + email);
-        if (featureName == null || email == null) {
-            return ResponseEntity
-                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body("Error >>> Expected parameters: featureName and email");
-        }
-        else {
-            Feature feature = featureService.findByFeatureNameAndEmail(featureName, email);
-            HashMap<String, Boolean> map = new HashMap<String, Boolean>();
-            map.put("canAccess", feature != null ? feature.isEnable() : false);
-            log.info("feature != null " + String.valueOf(feature != null));
-            if (feature != null) {
-                log.info("feature " + feature.toString());
-                log.info("enable " + String.valueOf(feature.isEnable()));
+        try {
+            log.info("featureName " + featureName);
+            log.info("email " + email);
+            if (featureName == null || email == null) {
+                return ResponseEntity
+                        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                        .body("Error >>> Expected parameters: featureName and email");
             }
-            return ResponseEntity.status(HttpStatus.OK).body(map);
+            else {
+                Feature feature = featureService.findByFeatureNameAndEmail(featureName, email);
+                HashMap<String, Boolean> map = new HashMap<String, Boolean>();
+                map.put("canAccess", feature != null ? feature.isEnable() : false);
+                log.info("feature != null " + String.valueOf(feature != null));
+                if (feature != null) {
+                    log.info("feature " + feature.toString());
+                    log.info("enable " + String.valueOf(feature.isEnable()));
+                }
+                return ResponseEntity.status(HttpStatus.OK).body(map);
+            }
+        }
+        catch (Exception exception) {
+            log.error(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
         }
     }
 
     @PostMapping("/feature")
     public ResponseEntity<?> create(@RequestBody Feature feature) {
-        log.info("Saved: " + featureService.save(feature).toString());
-        return ResponseEntity.ok(null);
+        try {
+            log.info("Saved: " + featureService.save(feature).toString());
+            return ResponseEntity.ok(null);
+        }
+        catch (Exception exception) {
+            log.error(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(exception.getMessage());
+        }
     }
 
 }
